@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculateur de promotion au grade de Professeur</title>
+  <style>
+    :root{
+      --bg:#eef6ff;
+      --bg2:#fff7ed;
+      --card:rgba(255,255,255,.92);
+      --ink:#102033;
+      --muted:#667085;
+      --line:#d7e3f1;
+      --accent:#2563eb;
+      --accent2:#7c3aed;
+      --accent3:#06b6d4;
+      --gold:#f59e0b;
+      --ok:#16a34a;
+      --warn:#d97706;
+      --bad:#dc2626;
+      --soft:#eef2ff;
+      --shadow:0 18px 45px rgba(15,23,42,.10);
+      --shadow-sm:0 10px 26px rgba(15,23,42,.07);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.22), transparent 28rem),
+        radial-gradient(circle at top right, rgba(245,158,11,.22), transparent 24rem),
+        radial-gradient(circle at bottom right, rgba(124,58,237,.18), transparent 24rem),
+        linear-gradient(135deg,var(--bg),#f8fafc 45%,var(--bg2));
+      min-height:100vh;
+    }
+    .wrap{max-width:1220px;margin:0 auto;padding:28px}
+    .hero{
+      position:relative;
+      overflow:hidden;
+      color:white;
+      border-radius:32px;
+      padding:34px;
+      box-shadow:0 26px 70px rgba(30,41,59,.24);
+      background:
+        linear-gradient(135deg,rgba(15,23,42,.98),rgba(30,64,175,.94) 45%,rgba(124,58,237,.88)),
+        radial-gradient(circle at 90% 10%,rgba(250,204,21,.36),transparent 16rem);
+    }
+    .hero:before{
+      content:"";
+      position:absolute;inset:-40%;
+      background:radial-gradient(circle,rgba(255,255,255,.18) 0 1px,transparent 1px);
+      background-size:28px 28px;
+      transform:rotate(10deg);
+      opacity:.25;
+    }
+    .hero>*{position:relative;z-index:1}
+    h1{margin:0;text-align:center;font-size:clamp(26px,3.2vw,42px);line-height:1.08;letter-spacing:-.025em}
+    .hero p{color:#eaf2ff;max-width:920px;font-size:16px;line-height:1.65;margin:16px 0 0}
+    .pill{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:7px 13px;border-radius:999px;font-size:14px;margin-bottom:12px;backdrop-filter:blur(10px)}
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:22px;margin-top:22px;align-items:start}
+    .card{
+      background:var(--card);
+      border:1px solid rgba(215,227,241,.9);
+      border-radius:var(--radius);
+      padding:22px;
+      box-shadow:var(--shadow-sm);
+      backdrop-filter:blur(12px);
+    }
+    aside.card{position:sticky;top:18px}
+    h2{margin:0 0 14px;font-size:23px;letter-spacing:-.02em;color:#0f172a}
+    h3{margin:18px 0 10px;font-size:16px;color:#1e293b;font-weight:500}.row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;align-items:end}
+    .field{display:flex;flex-direction:column;gap:7px}.field label{font-size:13px;font-weight:700;color:#334155;letter-spacing:.01em}
+    .field input,.field select{
+      width:100%;border:1px solid #cbd8ea;border-radius:14px;padding:11px 12px;background:#fff;color:var(--ink);font:inherit;
+      transition:border-color .18s, box-shadow .18s, transform .18s;
+      box-shadow:0 1px 0 rgba(15,23,42,.03);
+    }
+    .field input:focus,.field select:focus,td input:focus,td select:focus{outline:none;border-color:#60a5fa;box-shadow:0 0 0 4px rgba(37,99,235,.13)}
+    .field input:hover,.field select:hover{border-color:#93c5fd}
+    .field small{font-size:12px;color:var(--muted);line-height:1.35}
+    .c2{grid-column:span 2}.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c12{grid-column:span 12}
+    .btn{border:0;border-radius:15px;padding:12px 15px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 12px 24px rgba(37,99,235,.22);transition:transform .18s, box-shadow .18s, opacity .18s}.btn:hover{transform:translateY(-1px);box-shadow:0 16px 30px rgba(37,99,235,.28)}.btn.secondary{background:linear-gradient(135deg,#e0f2fe,#eef2ff);color:#0f172a;box-shadow:none;border:1px solid #cbd8ea}.btn.bad{background:#fee2e2;color:#991b1b;box-shadow:none}.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:14px;overflow:hidden;border-radius:18px;border:1px solid var(--line);table-layout:fixed}
+    th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top;font-size:13px;background:#fff;overflow:hidden}tr:last-child td{border-bottom:0}th{font-size:12px;color:#334155;background:linear-gradient(180deg,#eff6ff,#f8fafc);font-weight:700}td input,td select{width:100%;border:1px solid #cbd8ea;border-radius:12px;padding:8px;background:white}
+    main.card{min-width:0;overflow:hidden}
+    #articlesTable th:nth-child(1),#articlesTable td:nth-child(1){width:12%}
+    #articlesTable th:nth-child(2),#articlesTable td:nth-child(2){width:17%}
+    #articlesTable th:nth-child(3),#articlesTable td:nth-child(3){width:16%}
+    #articlesTable th:nth-child(4),#articlesTable td:nth-child(4){width:18%}
+    #articlesTable th:nth-child(5),#articlesTable td:nth-child(5){width:10%}
+    #articlesTable th:nth-child(6),#articlesTable td:nth-child(6){width:24%}
+    #articlesTable th:nth-child(7),#articlesTable td:nth-child(7){width:54px}
+    #articlesTable .src{white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.35;max-width:100%}
+    #articlesTable .src.truncate{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .badge{display:inline-flex;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:900;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}.AP{background:linear-gradient(135deg,#fde68a,#f59e0b);color:#78350f}.A{background:linear-gradient(135deg,#bbf7d0,#22c55e);color:#064e3b}.B{background:linear-gradient(135deg,#bfdbfe,#60a5fa);color:#1e3a8a}.PRED{background:linear-gradient(135deg,#fecaca,#ef4444);color:#7f1d1d}.NF{background:#f1f5f9;color:#475569}
+    .status{padding:13px;border-radius:16px;background:#f8fafc;border:1px solid var(--line);font-size:14px;color:#334155}.status.ok{background:#ecfdf5;border-color:#86efac;color:#166534}.status.warn{background:#fffbeb;border-color:#fcd34d;color:#92400e}.status.bad{background:#fef2f2;border-color:#fca5a5;color:#991b1b}
+    .score{font-size:44px;font-weight:1000;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.04em}.muted{color:var(--muted)}.sumline{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px dashed #d7e3f1;font-size:14px}.sumline strong{font-size:15px}.bar{height:13px;background:#dbeafe;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(15,23,42,.08)}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent),var(--accent2));width:0;border-radius:999px}.note{font-size:13px;color:#475569;line-height:1.55}.hidden{display:none}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+    .footer{margin:30px auto 0;text-align:center;color:#0f172a;font-size:clamp(18px,2.3vw,28px);font-weight:700;line-height:1.9;background:linear-gradient(135deg,#ffffff,#eff6ff 55%,#fff7ed);border:1px solid rgba(215,227,241,.9);border-radius:28px;padding:24px;box-shadow:var(--shadow);direction:rtl}
+    .section{margin-top:24px;padding-top:20px;border-top:1px solid #d9e6f5}.section:first-child{border-top:0}.section-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-end;margin-bottom:4px}.detail{font-size:12px;color:#64748b}.mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+    .subcard{border:1px solid rgba(203,216,234,.95);border-radius:22px;background:linear-gradient(180deg,#ffffff,#f8fbff);padding:16px;margin-top:15px;box-shadow:0 8px 20px rgba(15,23,42,.04)}.subcard h3{margin:0 0 13px;color:#0f172a;display:flex;align-items:center;gap:8px;font-weight:500}.subcard h3:before{content:"";width:9px;height:22px;border-radius:999px;background:linear-gradient(180deg,var(--accent3),var(--accent2))}
+    .check{display:flex;align-items:flex-start;gap:9px;border:1px solid #d7e3f1;border-radius:14px;padding:11px;background:#fff;box-shadow:0 3px 10px rgba(15,23,42,.035)}.check input{margin-top:3px;accent-color:var(--accent)}.check span{font-size:13px;font-weight:700;color:#334155}.check small{display:block;font-weight:400;color:var(--muted);margin-top:4px}.oktext{color:#15803d;font-weight:1000}.badtext{color:#b91c1c;font-weight:1000}.drop{border:2px dashed #93c5fd;background:linear-gradient(135deg,#eff6ff,#fff);border-radius:18px;padding:16px;text-align:center}.drop input{margin-top:10px}.progress{font-size:13px;color:#475569;white-space:pre-wrap;max-height:120px;overflow:auto;background:#f8fafc;border-radius:14px;padding:11px;border:1px solid var(--line)}
+    main.card .section:nth-of-type(1){background:linear-gradient(135deg,rgba(37,99,235,.05),transparent);border-radius:22px;padding:18px;margin:-4px -4px 0}
+    main.card .section:nth-of-type(2){background:linear-gradient(135deg,rgba(6,182,212,.06),transparent);border-radius:22px;padding:18px;margin:18px -4px 0}
+    main.card .section:nth-of-type(3){background:linear-gradient(135deg,rgba(245,158,11,.08),transparent);border-radius:22px;padding:18px;margin:18px -4px 0}
+    main.card .section:nth-of-type(4){background:linear-gradient(135deg,rgba(124,58,237,.06),transparent);border-radius:22px;padding:18px;margin:18px -4px 0}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}.row,.mini-grid{grid-template-columns:1fr}.c2,.c3,.c4,.c5,.c6,.c12{grid-column:auto}.wrap{padding:14px}table{display:block;overflow-x:auto;white-space:nowrap}.hero{padding:24px;border-radius:24px}aside.card{position:static}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Calculateur de promotion au grade de Professeur</h1>
+      <p>Ce calculateur additionne les critères de recevabilité, de pédagogie et de recherche. Pour les articles A+/A/B, il vérifie automatiquement l’ISSN, détecte la catégorie ou les revues prédatrices, puis applique le coefficient selon le rang d’auteur.</p>
+    </section>
+
+    <div class="grid">
+      <main class="card">
+        <div id="zipPanel" class="hidden">
+          <div id="zipStatus" class="status warn">Préparation du dossier <b>JOURNAUX</b>...</div>
+          <button class="btn secondary" id="clearCacheBtn">Réinitialiser l’index PDF</button>
+          <div id="progress" class="progress">Aucun PDF lu pour le moment.</div>
+        </div>
+
+        <section class="section" style="border-top:0;padding-top:0;margin-top:0">
+          <div class="section-title">
+            <h2>1) Recevabilité du dossier</h2>
+            <span class="detail">Conditions minimales avant calcul détaillé</span>
+          </div>
+          <div class="mini-grid">
+            <div class="field">
+              <label>Années effectives en MCA classe A</label>
+              <input class="criteria-input" id="yearsMCA" type="number" min="0" step="1" value="5">
+              <small>Condition indicative : 5 ans minimum.</small>
+            </div>
+            <label class="check"><input class="criteria-input" id="minPublication" type="checkbox"><span>Critère minimal de publication rempli<small>A+ / A / B selon le domaine et les conditions officielles.</small></span></label>
+            <label class="check"><input class="criteria-input" id="minSupervision" type="checkbox"><span>Critère minimal d’encadrement rempli<small>Doctorat, magister ou masters selon le cas.</small></span></label>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title">
+            <h2>2) Pédagogie</h2>
+            <span class="detail">Seuil indicatif : 80 points minimum</span>
+          </div>
+
+          <div class="subcard">
+            <h3>2.1 Enseignement : cours / TD / TP</h3>
+            <p class="note"><b>Règle appliquée :</b> saisissez uniquement le nombre de semestres pour chaque activité. Le calcul respecte la priorité <b>Cours &gt; TD &gt; TP</b> : si un cours est déclaré pour un semestre, le TD/TP du même semestre n’est pas ajouté ; si TD et TP existent sans cours, seul le TD est compté. Le total Cours + TD + TP est plafonné à 60 pts.</p>
+            <div class="mini-grid">
+              <div class="field"><label>Cours</label><input class="criteria-input" id="courseSem" type="number" min="0" value="0"><small>Nombre de semestres. 6 pts/semestre, max 60 pts.</small></div>
+              <div class="field"><label>TD</label><input class="criteria-input" id="tdSem" type="number" min="0" value="0"><small>Nombre de semestres. 1,5 pts/semestre, maximum 15 pts pour TD.</small></div>
+              <div class="field"><label>TP</label><input class="criteria-input" id="tpSem" type="number" min="0" value="0"><small>Nombre de semestres. 1,5 pts/semestre, maximum 15 pts pour TP.</small></div>
+              <label class="check"><input class="criteria-input" id="courseEnglish" type="checkbox"><span>Cours enseigné en anglais<small>+10 pts, hors plafond Cours/TD/TP.</small></span></label>
+            </div>
+          </div>
+
+          <div class="subcard">
+            <h3>2.2 Ressources pédagogiques</h3>
+            <div class="mini-grid">
+              <div class="field"><label>Matières en ligne validées</label><input class="criteria-input" id="onlineMatter" type="number" min="0" value="0"><small>30 pts/matière.</small></div>
+              <label class="check"><input class="criteria-input" id="onlineEnglish" type="checkbox"><span>Matière en ligne en anglais<small>+10 pts.</small></span></label>
+              <div class="field"><label>Polycopiés validés et mis en ligne</label><input class="criteria-input" id="handouts" type="number" min="0" value="0"><small>12 pts/polycopié.</small></div>
+              <div class="field"><label>Polycopiés en anglais</label><input class="criteria-input" id="handoutsEnglish" type="number" min="0" value="0"><small>+10 pts chacun.</small></div>
+              <div class="field"><label>Ouvrages pédagogiques édités</label><input class="criteria-input" id="pedagBooks" type="number" min="0" value="0"><small>30 pts/ouvrage.</small></div>
+              <div class="field"><label>Ouvrages pédagogiques en anglais</label><input class="criteria-input" id="pedagBooksEnglish" type="number" min="0" value="0"><small>+10 pts chacun.</small></div>
+            </div>
+          </div>
+
+          <div class="subcard">
+            <h3>2.3 Suivi pédagogique et encadrement</h3>
+            <div class="mini-grid">
+              <div class="field"><label>Tutorat - années</label><input class="criteria-input" id="tutoringYears" type="number" min="0" value="0"><small>3 pts/an, max 15.</small></div>
+              <div class="field"><label>Suivi stagiaires entreprise - années</label><input class="criteria-input" id="internshipsYears" type="number" min="0" value="0"><small>6 pts/an, max 30.</small></div>
+              <div class="field"><label>Projets tutorés université-entreprise</label><input class="criteria-input" id="tutoredProject" type="number" min="0" value="0"><small>5 pts/projet.</small></div>
+              <div class="field"><label>Animations pédagogiques</label><input class="criteria-input" id="pedagAnimation" type="number" min="0" value="0"><small>5 pts/participation.</small></div>
+              <div class="field"><label>Mémoires master / ingénieur</label><input class="criteria-input" id="masterMemoirs" type="number" min="0" value="0"><small>2 pts/mémoire, max 20.</small></div>
+              <div class="field"><label>Mémoires diplôme-startup / innovant</label><input class="criteria-input" id="startupMemoirs" type="number" min="0" value="0"><small>15 pts/mémoire, max 45.</small></div>
+              <div class="field"><label>Apprentissage anglais - années</label><input class="criteria-input" id="englishLearningYears" type="number" min="0" value="0"><small>6 pts/an, max 30.</small></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title">
+            <h2>3) Articles scientifiques A+ / A / B</h2>
+            <span class="detail">Vérification automatique par ISSN</span>
+          </div>
+
+        <p class="note">Pour chaque article : sélectionnez l’année de publication, saisissez l’ISSN de la revue, puis indiquez votre rang d’auteur. Le calcul utilise : catégorie A+ = 160 pts, catégorie A = 80 pts, catégorie B = 40 pts, 1er auteur = 100 %, 2e auteur = 50 %, 3e auteur et plus = 25 %. Si la revue est dans un fichier prédatrice/prédateur, le score est 0 et le résultat indique “Revue prédatrice”.</p>
+        <div class="actions">
+          <button class="btn" id="addArticleBtn">+ Ajouter un article</button>
+          <button class="btn" id="calcBtn">Calculer les articles</button>
+        </div>
+
+        <table id="articlesTable">
+          <thead>
+            <tr>
+              <th style="min-width:105px">Année</th>
+              <th style="min-width:135px">ISSN</th>
+              <th style="min-width:120px">Rang auteur</th>
+              <th style="min-width:140px">Résultat</th>
+              <th style="min-width:90px">Points</th>
+              <th style="min-width:220px">Source trouvée</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="articlesBody"></tbody>
+        </table>
+        </section>
+
+        <section class="section">
+          <div class="section-title">
+            <h2>4) Autres activités de recherche</h2>
+            <span class="detail">Classées par sous-critères</span>
+          </div>
+
+          <div class="subcard">
+            <h3>4.1 Publications et productions scientifiques</h3>
+            <div class="mini-grid">
+              <div class="field"><label>Publications catégorie C</label><input class="criteria-input" id="pubC" type="number" min="0" value="0"><small>20 pts/article, max 40.</small></div>
+              <div class="field"><label>Publications C en anglais</label><input class="criteria-input" id="pubCEnglish" type="number" min="0" value="0"><small>+10 pts/article.</small></div>
+              <div class="field"><label>Ouvrages scientifiques</label><input class="criteria-input" id="sciBooks" type="number" min="0" value="0"><small>40 pts/ouvrage.</small></div>
+              <div class="field"><label>Ouvrages scientifiques en anglais</label><input class="criteria-input" id="sciBooksEnglish" type="number" min="0" value="0"><small>+20 pts/ouvrage.</small></div>
+              <div class="field"><label>Chapitres d’ouvrage</label><input class="criteria-input" id="chapters" type="number" min="0" value="0"><small>10 pts/chapitre.</small></div>
+              <div class="field"><label>Chapitres en anglais</label><input class="criteria-input" id="chaptersEnglish" type="number" min="0" value="0"><small>+5 pts/chapitre.</small></div>
+            </div>
+          </div>
+
+          <div class="subcard">
+            <h3>4.2 Communications scientifiques</h3>
+            <div class="mini-grid">
+              <div class="field"><label>Communications internationales</label><input class="criteria-input" id="intlCom" type="number" min="0" value="0"><small>20 pts, max 40.</small></div>
+              <div class="field"><label>Proceedings indexés WoS/Scopus</label><input class="criteria-input" id="intlIndexed" type="number" min="0" value="0"><small>+5 pts/communication.</small></div>
+              <div class="field"><label>Communications nationales</label><input class="criteria-input" id="natCom" type="number" min="0" value="0"><small>10 pts, max 20.</small></div>
+            </div>
+          </div>
+
+          <div class="subcard">
+            <h3>4.3 Brevets</h3>
+            <div class="mini-grid">
+              <div class="field"><label>Brevets PCT exploités</label><input class="criteria-input" id="pctExploited" type="number" min="0" value="0"><small>80 pts/brevet.</small></div>
+              <div class="field"><label>Brevets PCT enregistrés</label><input class="criteria-input" id="pctRegistered" type="number" min="0" value="0"><small>60 pts/brevet.</small></div>
+              <div class="field"><label>Brevets INAPI</label><input class="criteria-input" id="inapi" type="number" min="0" value="0"><small>55 pts/brevet.</small></div>
+            </div>
+          </div>
+
+          <div class="subcard">
+            <h3>4.4 Encadrement et formation doctorale</h3>
+            <div class="mini-grid">
+              <div class="field"><label>Formation doctorale</label><input class="criteria-input" id="doctoralTraining" type="number" min="0" value="0"><small>15 pts.</small></div>
+              <div class="field"><label>Doctorats encadrés soutenus</label><input class="criteria-input" id="phdSupervised" type="number" min="0" value="0"><small>40 pts/doctorat.</small></div>
+              <div class="field"><label>Doctorats encadrés en anglais</label><input class="criteria-input" id="phdSupervisedEnglish" type="number" min="0" value="0"><small>+10 pts/thèse.</small></div>
+              <div class="field"><label>Doctorats co-encadrés soutenus</label><input class="criteria-input" id="phdCoSupervised" type="number" min="0" value="0"><small>15 pts/doctorat.</small></div>
+              <div class="field"><label>Doctorats co-encadrés en anglais</label><input class="criteria-input" id="phdCoSupervisedEnglish" type="number" min="0" value="0"><small>+10 pts/thèse.</small></div>
+              <div class="field"><label>Magisters encadrés soutenus</label><input class="criteria-input" id="magisterSupervised" type="number" min="0" value="0"><small>10 pts/magister.</small></div>
+            </div>
+          </div>
+
+          <div class="subcard">
+            <h3>4.5 Projets, valorisation et impact</h3>
+            <div class="mini-grid">
+              <div class="field"><label>Organisation manifestations scientifiques</label><input class="criteria-input" id="sciEventOrg" type="number" min="0" value="0"><small>5 pts, max 10.</small></div>
+              <div class="field"><label>Expertises / activité scientifique</label><input class="criteria-input" id="sciExpertise" type="number" min="0" value="0"><small>5 pts, max 10.</small></div>
+              <div class="field"><label>Projets coopération internationale</label><input class="criteria-input" id="intlProjects" type="number" min="0" value="0"><small>5 pts, max 10.</small></div>
+              <div class="field"><label>Activités de recherche PRFU/PNR/labo</label><input class="criteria-input" id="researchActivities" type="number" min="0" value="0"><small>5 pts, max 10.</small></div>
+              <div class="field"><label>Projets prioritaires santé/énergie/etc.</label><input class="criteria-input" id="priorityResearchProjects" type="number" min="0" value="0"><small>15 pts/projet.</small></div>
+              <div class="field"><label>Étudiants 5 étoiles formés</label><input class="criteria-input" id="fiveStarStudents" type="number" min="0" value="0"><small>5 pts/étudiant.</small></div>
+              <div class="field"><label>Bureaux d’études / filiales</label><input class="criteria-input" id="officeFiliale" type="number" min="0" value="0"><small>5 pts, max 10.</small></div>
+              <div class="field"><label>Startups labellisées / projets innovants</label><input class="criteria-input" id="startupInnovation" type="number" min="0" value="0"><small>20 pts/participation.</small></div>
+              <div class="field"><label>Apport à la communauté universitaire</label><input class="criteria-input" id="community" type="number" min="0" value="0"><small>5 pts, max 10.</small></div>
+              <div class="field"><label>Apport à la société</label><input class="criteria-input" id="society" type="number" min="0" value="0"><small>5 pts, max 10.</small></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="card">
+        <h2>Résumé global</h2>
+        <div class="field" style="margin:10px 0 14px 0">
+          <label>Domaine</label>
+          <select id="domain" class="criteria-input">
+            <option value="ST">Sciences & Technologies - 230 pts recherche</option>
+            <option value="SHS">Sciences Humaines & Sociales - 120 pts recherche</option>
+          </select>
+        </div>
+        <div id="eligibilityBox" class="status warn">Complétez les champs puis lancez le calcul.</div>
+        <div style="height:14px"></div>
+        <div class="sumline"><span>Recevabilité administrative</span><strong id="adminStatus">-</strong></div>
+        <div class="sumline"><span>Total pédagogie</span><strong><span id="pedagogyTotal">0.00</span> pts</strong></div>
+        <div class="bar"><span id="pedagogyBar"></span></div>
+        <div class="sumline"><span>Articles A+ / A / B vérifiés</span><strong><span id="articleTotal">0.00</span> pts</strong></div>
+        <div class="sumline"><span>Autres activités recherche</span><strong><span id="otherResearchTotal">0.00</span> pts</strong></div>
+        <div class="sumline"><span>Total recherche</span><strong><span id="researchTotal">0.00</span> pts</strong></div>
+        <div class="bar"><span id="researchBar"></span></div>
+        <p id="thresholdText" class="note"></p>
+        <div class="sumline"><span>Total général</span><strong><span id="grandTotal">0.00</span> pts</strong></div>
+
+        <h3>Détail articles</h3>
+        <div class="sumline"><span>Articles catégorie A+</span><strong id="countAP">0</strong></div>
+        <div class="sumline"><span>Articles catégorie A</span><strong id="countA">0</strong></div>
+        <div class="sumline"><span>Articles catégorie B</span><strong id="countB">0</strong></div>
+        <div class="sumline"><span>Revues prédatrices</span><strong id="countPred">0</strong></div>
+        <div class="sumline"><span>ISSN non trouvés</span><strong id="countNF">0</strong></div>
+        <h3>Important</h3>
+        <p class="note">Ce calculateur reste indicatif : vérifiez toujours les pièces justificatives, les arrêtés officiels, le classement DGRSDT et les règles applicables à votre session CUN.</p>
+      </aside>
+    </div>
+
+    <div class="footer" dir="rtl" lang="ar">اللهم اجعلنا ممن يذكرون ويُذكرون بالخير، وارزقنا وإياكم إجابة الدعوات، وفرج الهموم، وبارك لنا ولكم في الدنيا والآخرة.</div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  const YEARS = Array.from({length:10}, (_,i)=>String(2017+i));
+  // La page ne contient plus de liste fixe des PDF.
+  // Elle lit automatiquement les dossiers JOURNAUX/annee/, JOURNAUX/annee/A+/, JOURNAUX/annee/A/ et JOURNAUX/annee/B/
+  // depuis le serveur local, par exemple avec : python -m http.server
+  const ISSN_RE = /(?<!\d)(\d{4})\s*[-–— ]?\s*(\d{3}[0-9Xx])(?!\d)/g;
+  const state = { files:[], indexByYear:{}, rows:[], lastArticleResults:[] };
+
+  const $ = (id)=>document.getElementById(id);
+  const log = (msg)=>{ const p=$('progress'); p.textContent = (p.textContent==='Aucun PDF lu pour le moment.'?'':p.textContent+'\n') + msg; p.scrollTop=p.scrollHeight; };
+  const setZipStatus = (html, cls='warn') => { const el=$('zipStatus'); el.className='status '+cls; el.innerHTML=html; };
+
+
+  function isFileMode(){ return window.location.protocol === 'file:'; }
+  function showFileModeWarning(){
+    if(!isFileMode()) return false;
+    const msg = `Cette page est ouverte en mode fichier local (file:///). Le navigateur interdit alors la lecture automatique du dossier JOURNAUX.
+
+Solution : double-cliquez sur lancer_calculateur.bat ou lancez dans ce dossier :
+python -m http.server 8000
+
+Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
+    setZipStatus(`<b>Mode fichier local détecté.</b> Lancez la page via <span class="mono">lancer_calculateur.bat</span> ou <span class="mono">python -m http.server 8000</span>, puis ouvrez <span class="mono">http://localhost:8000/promotion_professeur_calculateur.html</span>.`, 'bad');
+    $('progress').textContent = msg;
+    return true;
+  }
+
+  function normalizePath(s){ return String(s||'').replace(/\\/g,'/'); }
+  function encodePathForUrl(path){ return normalizePath(path).split('/').map(encodeURIComponent).join('/'); }
+  function pdfUrl(path){ return encodePathForUrl(path); }
+  function dirUrl(path){
+    const cleaned = normalizePath(path).replace(/\/+$/,'') + '/';
+    return encodePathForUrl(cleaned);
+  }
+  function isGitHubPages(){ return /(^|\.)github\.io$/i.test(window.location.hostname); }
+  function githubRepo(){
+    const host = window.location.hostname;
+    if(isGitHubPages()){
+      const owner = host.split('.')[0];
+      const parts = window.location.pathname.split('/').filter(Boolean);
+      const firstPath = parts[0] || '';
+      if(firstPath && !/\.html?$/i.test(firstPath)) return `${owner}/${firstPath}`;
+      return `${owner}/${owner}.github.io`;
+    }
+    return 'dzprof/dzprof.github.io';
+  }
+  function githubApiPath(path, branch){
+    const repo = githubRepo();
+    const cleaned = normalizePath(path).replace(/^\/+|\/+$/g,'');
+    const encoded = cleaned.split('/').map(encodeURIComponent).join('/');
+    return `https://api.github.com/repos/${repo}/contents/${encoded}?ref=${branch}`;
+  }
+  function normalizeISSN(s){
+    const raw = String(s||'').toUpperCase().replace(/[^0-9X]/g,'');
+    if(raw.length !== 8) return '';
+    return raw.slice(0,4)+'-'+raw.slice(4);
+  }
+  function authorFactor(rank){ return rank === '1' ? 1 : rank === '2' ? 0.5 : 0.25; }
+  function categoryFromPath(path){
+    const p = normalizePath(path).toLowerCase();
+    if(p.includes('predat') || p.includes('pr#u00e9dat') || p.includes('prédat') || p.includes('prédateur') || p.includes('predatrice') || p.includes('pr#u00e9diteurs')) return 'PRED';
+    if(p.includes('/a+/') || p.includes('/a%2b/')) return 'AP';
+    if(p.includes('/a/')) return 'A';
+    if(p.includes('/b/')) return 'B';
+    return 'OTHER';
+  }
+  function yearFromPath(path){ const m = normalizePath(path).match(/(?:^|\/)(20\d{2})(?:\/|$)/); return m ? m[1] : ''; }
+
+  function uniqueFiles(files){
+    const seen = new Set();
+    return files.filter(f => {
+      const key = normalizePath(f.path);
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function parseDirectoryListing(html, basePath){
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const files = [];
+    for(const a of [...doc.querySelectorAll('a[href]')]){
+      let href = a.getAttribute('href') || '';
+      if(!href || href === '../' || href.startsWith('?') || href.startsWith('#')) continue;
+      href = href.split('?')[0].split('#')[0];
+      try { href = decodeURIComponent(href); } catch(e) {}
+      if(href.includes('/')) continue; // on lit seulement le dossier demandé, pas les sous-dossiers indirects
+      if(!/\.pdf$/i.test(href)) continue;
+      const path = normalizePath(basePath + href);
+      files.push({path, year:yearFromPath(path), cat:categoryFromPath(path)});
+    }
+    return files;
+  }
+
+  async function listPdfDirectoryViaGithub(basePath){
+    const branches = ['main', 'master'];
+    for(const branch of branches){
+      try{
+        const response = await fetch(githubApiPath(basePath, branch), {cache:'no-store'});
+        if(!response.ok) continue;
+        const data = await response.json();
+        if(!Array.isArray(data)) continue;
+        return data
+          .filter(item => item && item.type === 'file' && /\.pdf$/i.test(item.name || ''))
+          .map(item => {
+            const path = normalizePath(item.path || (normalizePath(basePath).replace(/\/+$/,'') + '/' + item.name));
+            return {path, url:item.download_url || encodePathForUrl(path), year:yearFromPath(path), cat:categoryFromPath(path)};
+          });
+      }catch(e){
+        log(`API GitHub non disponible pour ${basePath} (${branch}) : ${e.message}`);
+      }
+    }
+    return [];
+  }
+
+  async function listPdfDirectory(basePath){
+    if(isGitHubPages()){
+      return await listPdfDirectoryViaGithub(basePath);
+    }
+    try{
+      const response = await fetch(dirUrl(basePath), {cache:'no-store'});
+      if(response.ok){
+        const html = await response.text();
+        const files = parseDirectoryListing(html, basePath.endsWith('/') ? basePath : basePath + '/');
+        if(files.length) return files;
+      }
+    }catch(e){
+      // Fallback ci-dessous.
+    }
+    return await listPdfDirectoryViaGithub(basePath);
+  }
+
+
+  async function tryLoadManifest(){
+    try{
+      const response = await fetch('journaux_manifest.json?ts=' + Date.now(), {cache:'no-store'});
+      if(!response.ok) return false;
+      const manifest = await response.json();
+      const list = Array.isArray(manifest) ? manifest : (manifest.files || []);
+      const files = list
+        .filter(x => x && x.path && /\.pdf$/i.test(String(x.path)))
+        .map(x => {
+          const path = normalizePath(x.path);
+          return {
+            path,
+            url: x.url || pdfUrl(path),
+            year: String(x.year || yearFromPath(path)),
+            cat: x.cat || categoryFromPath(path)
+          };
+        })
+        .filter(x => x.year && ['AP','A','B','PRED'].includes(x.cat));
+      if(!files.length) return false;
+      state.files = uniqueFiles(files);
+      state.manifestLoaded = true;
+      state.discoveredYears = state.discoveredYears || {};
+      const years = [...new Set(state.files.map(f => f.year))].sort();
+      log(`Manifest chargé : ${state.files.length} PDF listés (${years.join(', ')}).`);
+      return true;
+    }catch(e){
+      log('Manifest non chargé : ' + e.message);
+      return false;
+    }
+  }
+
+  async function discoverYear(year){
+    year = String(year);
+    if(state.discoveredYears && state.discoveredYears[year]) return;
+    state.discoveredYears = state.discoveredYears || {};
+
+    if(state.manifestLoaded){
+      const found = (state.files || []).filter(f => f.year === year);
+      state.discoveredYears[year] = true;
+      const nAP = found.filter(f=>f.cat==='AP').length;
+      const nA = found.filter(f=>f.cat==='A').length;
+      const nB = found.filter(f=>f.cat==='B').length;
+      const nP = found.filter(f=>f.cat==='PRED').length;
+      log(`Manifest ${year} : ${found.length} PDF disponibles (A+=${nAP}, A=${nA}, B=${nB}, prédatrice=${nP}).`);
+      return;
+    }
+
+    const bases = [`JOURNAUX/${year}/`, `JOURNAUX/${year}/A+/`, `JOURNAUX/${year}/A/`, `JOURNAUX/${year}/B/`];
+    let found = [];
+    for(const base of bases){
+      found = found.concat(await listPdfDirectory(base));
+    }
+    state.files = uniqueFiles([...(state.files || []), ...found]);
+    state.discoveredYears[year] = true;
+
+    const nAP = found.filter(f=>f.cat==='AP').length;
+    const nA = found.filter(f=>f.cat==='A').length;
+    const nB = found.filter(f=>f.cat==='B').length;
+    const nP = found.filter(f=>f.cat==='PRED').length;
+    log(`Dossiers ${year} lus : ${found.length} PDF détectés (A+=${nAP}, A=${nA}, B=${nB}, prédatrice=${nP}).`);
+  }
+
+  async function loadJournalFolderManifest(){
+    state.files = [];
+    state.discoveredYears = {};
+    state.manifestLoaded = false;
+    if(showFileModeWarning()) return;
+    const hasManifest = await tryLoadManifest();
+    if(hasManifest){
+      setZipStatus('<b>journaux_manifest.json</b> chargé. La version site web est prête.', 'ok');
+      $('progress').textContent = 'Manifest chargé. Cliquez sur Calculer les articles pour lire les PDF de l’année demandée.';
+      return;
+    }
+    const mode = isGitHubPages() ? 'GitHub Pages détecté : lecture des PDF via API GitHub.' : 'Lecture directe du dossier JOURNAUX.';
+    setZipStatus(`<b>Dossier JOURNAUX</b> prêt. ${mode}`, 'ok');
+    $('progress').textContent = mode + ' Cliquez sur Calculer les articles pour lire les PDF de l’année demandée. Si cela ne marche pas sur GitHub Pages, ajoutez journaux_manifest.json à côté de index.html.';
+  }
+
+  async function indexYear(year){
+    if(state.indexByYear[year]) return state.indexByYear[year];
+    await discoverYear(year);
+
+    const idx = {AP:new Map(), A:new Map(), B:new Map(), PRED:new Map()};
+    const pdfs = state.files.filter(f => f.year === String(year) && ['AP','A','B','PRED'].includes(f.cat));
+    if(!pdfs.length){
+      log(`Aucun PDF détecté pour l’année ${year}. Vérifiez que les fichiers sont dans JOURNAUX/${year}/A+/, JOURNAUX/${year}/A/ ou JOURNAUX/${year}/B/. Sur GitHub Pages, vérifiez aussi que journaux_manifest.json est bien à côté de index.html et que les PDF sont dans la branche main.`);
+      state.indexByYear[year] = idx;
+      return idx;
+    }
+    log(`Lecture de ${pdfs.length} PDF pour l’année ${year}...`);
+    for(const f of pdfs){
+      log(`- ${f.path}`);
+      try{
+        const response = await fetch(f.url || pdfUrl(f.path), {cache:'no-store'});
+        if(!response.ok) throw new Error('PDF introuvable : '+f.path);
+        const data = await response.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({data}).promise;
+        for(let pageNo=1; pageNo<=pdf.numPages; pageNo++){
+          const page = await pdf.getPage(pageNo);
+          const content = await page.getTextContent();
+          const lines = pdfTextLines(content.items);
+
+          for(let li=0; li<lines.length; li++){
+            const line = lines[li];
+            const text = line.text;
+            ISSN_RE.lastIndex = 0;
+            let m;
+            while((m = ISSN_RE.exec(text)) !== null){
+              const issn = `${m[1]}-${String(m[2]).toUpperCase()}`;
+              if(!idx[f.cat].has(issn)) idx[f.cat].set(issn, []);
+              if(idx[f.cat].get(issn).length < 4){
+                const prevLine = lines[li-1] ? lines[li-1].text : '';
+                const nextLine = lines[li+1] ? lines[li+1].text : '';
+                const aroundLines = lines.slice(Math.max(0, li-8), Math.min(lines.length, li+9)).map(x => x.text);
+                const journalName = journalNameFromPdfLine(line.segments || [], text, issn, prevLine, nextLine, aroundLines, li - Math.max(0, li-8));
+                idx[f.cat].get(issn).push({
+                  file:f.path,
+                  page:pageNo,
+                  context:text.replace(/\s+/g,' ').trim(),
+                  journal: journalName
+                });
+              }
+            }
+          }
+        }
+        if(pdf.destroy) await pdf.destroy();
+      }catch(e){
+        log(`  Erreur lecture PDF : ${e.message}`);
+      }
+    }
+    log(`Index ${year} terminé : A+=${idx.AP.size}, A=${idx.A.size}, B=${idx.B.size}, prédatrice=${idx.PRED.size} ISSN.`);
+    state.indexByYear[year] = idx;
+    return idx;
+  }
+
+  function addArticle(row={year:'2018',issn:'',rank:'1'}){
+    state.rows.push(row);
+    renderRows();
+  }
+  function removeArticle(i){ state.rows.splice(i,1); renderRows(); updateSummary([]); }
+  function renderRows(){
+    const body=$('articlesBody'); body.innerHTML='';
+    state.rows.forEach((r,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td><select data-i="${i}" data-k="year">${YEARS.map(y=>`<option ${r.year==y?'selected':''}>${y}</option>`).join('')}</select></td>
+        <td><input value="${escapeHtml(r.issn||'')}" data-i="${i}" data-k="issn" placeholder="ex. 1234-567X"></td>
+        <td><select data-i="${i}" data-k="rank"><option value="1" ${r.rank==='1'?'selected':''}>1er auteur</option><option value="2" ${r.rank==='2'?'selected':''}>2e auteur</option><option value="3" ${r.rank==='3'?'selected':''}>3e et plus</option></select></td>
+        <td class="res"><span class="badge NF">Non calculé</span></td>
+        <td class="pts">0</td>
+        <td class="src muted">-</td>
+        <td><button class="btn bad" data-del="${i}" title="Supprimer">×</button></td>`;
+      body.appendChild(tr);
+    });
+    body.querySelectorAll('input,select').forEach(el=>el.addEventListener('input', e=>{ const i=+e.target.dataset.i; const k=e.target.dataset.k; state.rows[i][k]=e.target.value; }));
+    body.querySelectorAll('[data-del]').forEach(el=>el.addEventListener('click', e=>removeArticle(+e.target.dataset.del)));
+  }
+  function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  function pdfTextLines(items){
+    const raw = [];
+    for(const it of items || []){
+      const str = String(it.str || '').trim();
+      if(!str) continue;
+      const tr = it.transform || [1,0,0,1,0,0];
+      raw.push({str, x: tr[4] || 0, y: tr[5] || 0});
+    }
+    raw.sort((a,b)=>{
+      if(Math.abs(b.y - a.y) > 3) return b.y - a.y;
+      return a.x - b.x;
+    });
+
+    const groups = [];
+    for(const item of raw){
+      let g = groups.find(row => Math.abs(row.y - item.y) <= 3.5);
+      if(!g){
+        g = {y:item.y, items:[]};
+        groups.push(g);
+      }
+      g.items.push(item);
+      g.y = (g.y * (g.items.length - 1) + item.y) / g.items.length;
+    }
+
+    return groups
+      .sort((a,b)=>b.y-a.y)
+      .map(g=>{
+        g.items.sort((a,b)=>a.x-b.x);
+        let cursor = 0;
+        const parts = [];
+        const segments = [];
+        for(const item of g.items){
+          const str = item.str;
+          if(!str) continue;
+          if(parts.length) cursor += 1;
+          const start = cursor;
+          parts.push(str);
+          cursor += str.length;
+          segments.push({str, x:item.x, y:item.y, start, end:cursor});
+        }
+        return { y:g.y, items:g.items, segments, text: parts.join(' ').replace(/\s+/g,' ').trim() };
+      })
+      .filter(r=>r.text);
+  }
+
+  function looksLikeIssn(s){
+    return /\b\d{4}\s*[-–— ]?\s*\d{3}[0-9Xx]\b/.test(String(s || ''));
+  }
+
+
+  function stripKnownPublisherTail(s){
+    return cleanJournalName(String(s || '')
+      .replace(/\b(ELSEVIER(?:\s+SCIENCE)?(?:\s+(?:BV|B V|INC|LTD))?|SPRINGER(?:\s+(?:NATURE|VERLAG))?|WILEY(?:\s+BLACKWELL)?|TAYLOR\s*&?\s*FRANCIS|SAGE(?:\s+PUBLICATIONS)?|IEEE|ACM|OXFORD\s+UNIV(?:ERSITY)?\s+PRESS|CAMBRIDGE\s+UNIV(?:ERSITY)?\s+PRESS|NATURE\s+PUBLISHING\s+GROUP|MDPI|HINDAWI|DE\s+GRUYTER|ASME|IOP\s+PUBLISHING|ROYAL\s+SOC(?:IETY)?|AMER(?:ICAN)?\s+CHEM(?:ICAL)?\s+SOC(?:IETY)?|LIPPINCOTT|KLUWER|BRILL|EMERALD|FRONTIERS|PLOS|BIOMED\s+CENTRAL)\b.*$/i, '')
+      .replace(/\b(PUBLISHER|EDITEUR|ÉDITEUR|ISSN|E-ISSN|EISSN|PRINT ISSN|ONLINE ISSN|JOURNAL TITLE|TITRE DE LA REVUE|N°|NO)\b.*$/i, '')
+    );
+  }
+
+  function titleFromLineText(lineText, issn){
+    let text = String(lineText || '').replace(/\s+/g,' ').trim();
+    if(!text) return '';
+    const issnCompact = String(issn || '').toUpperCase();
+    const pos = text.toUpperCase().indexOf(issnCompact);
+    let before = pos >= 0 ? text.slice(0, pos) : text;
+    before = before
+      .replace(/\b\d{4}\s*[-–— ]?\s*\d{3}[0-9Xx]\b/g, ' ')
+      .replace(/\b(N°|NO|Nº|JOURNAL TITLE|TITLE|TITRE DE LA REVUE|PUBLISHER|ISSN|E-ISSN|EISSN)\b/ig, ' ')
+      .replace(/\s+/g,' ')
+      .trim();
+
+    // Si une en-tête et une ligne de revue sont fusionnées, prendre la partie après le dernier numéro d'ordre.
+    const matches = [...before.matchAll(/(?:^|\s)(\d{2,6})\s+/g)];
+    if(matches.length){
+      const last = matches[matches.length - 1];
+      before = before.slice((last.index || 0) + last[0].length).trim();
+    }else{
+      before = before.replace(/^\d+\s+/, '').trim();
+    }
+
+    before = stripKnownPublisherTail(before);
+    before = before.replace(/\s{2,}.*/, '').trim();
+    return isLikelyJournalName(before) ? before : '';
+  }
+
+  function cleanJournalToken(s){
+    return cleanJournalName(String(s || '')
+      .replace(/^\d+\s+/, '')
+      .replace(/\b\d{4}\s*[-–— ]?\s*\d{3}[0-9Xx]\b/g, '')
+      .replace(/\b(ISSN|EISSN|E-ISSN|P-ISSN|PRINT ISSN|ONLINE ISSN|ISSN-L|EISSN-L)\b[:\s-]*/ig, '')
+      .replace(/\b(ELSEVIER|SPRINGER|WILEY|TAYLOR|FRANCIS|SAGE|IEEE|ACM|OXFORD|CAMBRIDGE|NATURE|MDPI|HINDAWI|DE GRUYTER)\b.*$/i, '')
+    );
+  }
+
+  function titleFromLineSegments(segments, lineText, issn){
+    const text = String(lineText || '').replace(/\s+/g,' ').trim();
+    const normalizedIssn = normalizeISSN(issn);
+    if(!segments || !segments.length || !normalizedIssn) return '';
+
+    const pos = text.toUpperCase().indexOf(normalizedIssn.toUpperCase());
+    let issnSeg = null;
+    if(pos >= 0){
+      issnSeg = segments.find(seg => pos >= seg.start - 1 && pos <= seg.end + 1) || null;
+    }
+    if(!issnSeg){
+      issnSeg = segments.find(seg => normalizeISSN(seg.str) === normalizedIssn || String(seg.str).toUpperCase().includes(normalizedIssn));
+    }
+    if(!issnSeg) return '';
+
+    // Même ligne, colonnes à gauche de l'ISSN : N°, Journal Title, Publisher, éventuellement ISSN papier.
+    const left = segments
+      .filter(seg => seg.x < issnSeg.x - 4)
+      .map(seg => seg.str)
+      .join(' ')
+      .replace(/\s+/g,' ')
+      .trim();
+
+    let candidate = titleFromLineText(left + ' ' + normalizedIssn, normalizedIssn);
+    if(candidate) return candidate;
+
+    // Si le nom et l'ISSN sont dans la même cellule texte, prendre la partie avant l'ISSN.
+    candidate = titleFromLineText(text, normalizedIssn);
+    if(candidate && candidate.length <= 140) return candidate;
+    return '';
+  }
+
+  function splitLongTitleColumn(s){
+    s = cleanJournalName(s);
+    if(s.length < 140) return [s];
+    // Sépare les colonnes de titres collées, sans couper "Journal of ..." lorsqu'il est unique.
+    const parts = s
+      .split(/(?=\b(?:JOURNAL OF|Journal of|REVUE|Revue|ANNALES|Annales|BULLETIN|Bulletin|PROCEEDINGS|Proceedings)\b)/g)
+      .map(cleanJournalName)
+      .filter(x => x.length >= 4 && x.length <= 140);
+    return parts.length ? parts : [s];
+  }
+
+  function journalNameFromPdfLine(segments, lineText, issn, prevLine, nextLine, aroundLines=[], centerIndex=0){
+    const issnCompact = normalizeISSN(issn);
+
+    const segmentTitle = titleFromLineSegments(segments, lineText, issnCompact);
+    if(segmentTitle) return segmentTitle;
+
+    const directTitle = titleFromLineText(lineText, issnCompact);
+    if(directTitle && directTitle.length <= 140) return directTitle;
+
+    const arr = (segments || []).map(x => String(x.str || '').trim()).filter(Boolean);
+    let issnIndex = arr.findIndex(x => normalizeISSN(x) === issnCompact || x.toUpperCase().includes(issnCompact));
+
+    if(issnIndex >= 0){
+      const before = arr.slice(0, issnIndex).filter(x => !looksLikeIssn(x));
+      const after = arr.slice(issnIndex + 1).filter(x => !looksLikeIssn(x));
+      const candidates = [...before, ...after]
+        .flatMap(splitLongTitleColumn)
+        .map(cleanJournalToken)
+        .filter(x => isLikelyJournalName(x) && x.length <= 140);
+
+      if(candidates.length){
+        const firstTitle = candidates.find(x => !/^\d+$/.test(x));
+        if(firstTitle) return firstTitle;
+      }
+    }
+
+    const fromContext = journalNameFromContext(lineText, issnCompact);
+    if(fromContext && fromContext.length <= 140 && /[A-Za-zÀ-ÿ]/.test(fromContext)) return fromContext;
+
+    // Si le PDF place l'ISSN sur une ligne séparée, chercher la ligne de titre la plus proche.
+    const lines = (aroundLines || []).map(x => String(x || ''));
+    const order = [];
+    for(let d=1; d<=8; d++) order.push(centerIndex - d);
+    for(let d=1; d<=8; d++) order.push(centerIndex + d);
+    for(const j of order){
+      if(j < 0 || j >= lines.length) continue;
+      const raw = lines[j];
+      if(!raw || looksLikeIssn(raw)) continue;
+      const candidates = splitLongTitleColumn(raw)
+        .map(cleanJournalToken)
+        .filter(x => isLikelyJournalName(x) && x.length <= 140);
+      if(candidates.length) return candidates[candidates.length - 1];
+    }
+
+    const around = [prevLine, nextLine]
+      .flatMap(splitLongTitleColumn)
+      .map(cleanJournalToken)
+      .filter(x => isLikelyJournalName(x) && x.length <= 140);
+    return around[0] || '';
+  }
+
+  function isLikelyJournalName(s){
+    s = cleanJournalName(s);
+    if(!s || s.length < 4) return false;
+    if(!/[A-Za-zÀ-ÿ]/.test(s)) return false;
+    if(looksLikeIssn(s)) return false;
+    if(/^(A|B|C|Q[1-4]|ISSN|EISSN|E-ISSN|SOURCE|TITLE|JOURNAL|JOURNAL TITLE|PUBLISHER|EDITEUR|ÉDITEUR|NO|N°|Nº|PAGE|RANK|SJR|SNIP|CITESCORE)$/i.test(s)) return false;
+    if(/^(PRINT|ONLINE|COUNTRY|LANGUAGE|CATEGORY|SUBJECT AREA)$/i.test(s)) return false;
+    if(/^\d+$/.test(s)) return false;
+    if(/^\d+\s*$/.test(s)) return false;
+    return true;
+  }
+  function cleanJournalName(name){
+    return String(name || '')
+      .replace(/\s+/g, ' ')
+      .replace(/^[-–—:;.,\s]+|[-–—:;.,\s]+$/g, '')
+      .trim();
+  }
+
+  function journalNameFromContext(context, issn){
+    const fromLine = titleFromLineText(context, issn);
+    if(fromLine) return fromLine;
+    const text = String(context || '').replace(/\s+/g, ' ').trim();
+    if(!text) return '';
+    const pos = text.toUpperCase().indexOf(String(issn || '').toUpperCase());
+    const before = pos >= 0 ? text.slice(0, pos) : text;
+    const parts = before.split(/\s{2,}|[;|]/).map(cleanJournalName).filter(Boolean);
+    let candidate = parts.length ? parts[parts.length - 1] : before;
+    candidate = candidate
+      .replace(/^(ISSN|EISSN|E-ISSN|P-ISSN|PRINT ISSN|ONLINE ISSN)\b[:\s-]*/i, '')
+      .replace(/\b(ISSN|EISSN|E-ISSN|P-ISSN|PRINT ISSN|ONLINE ISSN)\b.*$/i, '')
+      .replace(/\d{4}\s*[-–— ]?\s*\d{3}[0-9Xx].*$/g, '');
+    candidate = cleanJournalName(candidate);
+    if(candidate.length > 90) candidate = candidate.slice(-90).replace(/^\S+\s+/, '');
+    return candidate;
+  }
+
+  function fileNameWithoutPdf(path){
+    return normalizePath(path).split('/').pop().replace(/\.pdf$/i, '');
+  }
+
+  function formatSource(list, issn){
+    if(!list || !list.length) return '-';
+    const x=list[0];
+    const journal = cleanJournalName(x.journal) || journalNameFromContext(x.context, issn) || '-';
+    return escapeHtml(journal);
+  }
+
+  async function calculateArticles(){
+    if(showFileModeWarning()){
+      alert('La page est ouverte en file://. Pour lire le dossier JOURNAUX, double-cliquez sur lancer_calculateur.bat ou lancez : python -m http.server 8000');
+      return;
+    }
+    const years = [...new Set(state.rows.map(r=>r.year))];
+    for(const y of years) await indexYear(y);
+    const results=[];
+    const trs=[...$('articlesBody').querySelectorAll('tr')];
+    for(let i=0;i<state.rows.length;i++){
+      const r=state.rows[i]; const issn=normalizeISSN(r.issn); const idx=state.indexByYear[r.year];
+      let status='ISSN invalide', cls='NF', points=0, src='-';
+      if(issn && idx){
+        if(idx.PRED.has(issn)){
+          status='Revue prédatrice'; cls='PRED'; points=0; src=formatSource(idx.PRED.get(issn), issn);
+        }else if(idx.AP.has(issn)){
+          status='Catégorie A+'; cls='AP'; points=160*authorFactor(r.rank); src=formatSource(idx.AP.get(issn), issn);
+        }else if(idx.A.has(issn)){
+          status='Catégorie A'; cls='A'; points=80*authorFactor(r.rank); src=formatSource(idx.A.get(issn), issn);
+        }else if(idx.B.has(issn)){
+          status='Catégorie B'; cls='B'; points=40*authorFactor(r.rank); src=formatSource(idx.B.get(issn), issn);
+        }else{
+          status='ISSN non trouvé'; cls='NF'; points=0;
+        }
+      }
+      results.push({status, cls, points});
+      trs[i].querySelector('.res').innerHTML = `<span class="badge ${cls}">${status}</span>`;
+      trs[i].querySelector('.pts').textContent = points.toFixed(2);
+      const srcCell = trs[i].querySelector('.src');
+      srcCell.innerHTML = src;
+      srcCell.title = src.replace(/<[^>]*>/g, '');
+      srcCell.classList.add('truncate');
+    }
+    state.lastArticleResults = results;
+    updateSummary(results);
+  }
+  function num(id){ const el=$(id); return el ? Math.max(0, Number(el.value || 0)) : 0; }
+  function chk(id){ const el=$(id); return !!(el && el.checked); }
+  function capPts(value, max){ return max == null ? value : Math.min(value, max); }
+  function linePts(id, points, max){ return capPts(num(id) * points, max); }
+
+  function criteriaScores(){
+    const courseCount = num('courseSem');
+    const tdDeclared = num('tdSem');
+    const tpDeclared = num('tpSem');
+    // TD et TP ont chacun leur propre plafond séparé de 15 points.
+    // Le total global Enseignement Cours/TD/TP reste plafonné à 60 points.
+    const coursePtsRaw = courseCount * 6;
+    const tdPtsRaw = tdDeclared * 1.5;
+    const tpPtsRaw = tpDeclared * 1.5;
+    const coursePts = Math.min(coursePtsRaw, 60);
+    const tdPts = Math.min(tdPtsRaw, 15);
+    const tpPts = Math.min(tpPtsRaw, 15);
+    const teachingRaw = coursePts + tdPts + tpPts;
+    const teachingCapped = Math.min(teachingRaw, 60);
+
+    const pedagogy = {
+      teaching: teachingCapped + (chk('courseEnglish') ? 10 : 0),
+      onlineMatter: linePts('onlineMatter', 30) + (chk('onlineEnglish') ? 10 : 0),
+      handouts: linePts('handouts', 12) + linePts('handoutsEnglish', 10),
+      pedagBooks: linePts('pedagBooks', 30) + linePts('pedagBooksEnglish', 10),
+      tutoring: linePts('tutoringYears', 3, 15),
+      internships: linePts('internshipsYears', 6, 30),
+      tutoredProject: linePts('tutoredProject', 5),
+      pedagAnimation: linePts('pedagAnimation', 5),
+      masterMemoirs: linePts('masterMemoirs', 2, 20),
+      startupMemoirs: linePts('startupMemoirs', 15, 45),
+      englishLearning: linePts('englishLearningYears', 6, 30)
+    };
+    const researchOther = {
+      pubC: linePts('pubC', 20, 40) + linePts('pubCEnglish', 10),
+      sciBooks: linePts('sciBooks', 40) + linePts('sciBooksEnglish', 20),
+      chapters: linePts('chapters', 10) + linePts('chaptersEnglish', 5),
+      intlCom: linePts('intlCom', 20, 40) + linePts('intlIndexed', 5),
+      natCom: linePts('natCom', 10, 20),
+      patents: linePts('pctExploited', 80) + linePts('pctRegistered', 60) + linePts('inapi', 55),
+      doctoralTraining: linePts('doctoralTraining', 15),
+      phdSupervised: linePts('phdSupervised', 40) + linePts('phdSupervisedEnglish', 10),
+      phdCoSupervised: linePts('phdCoSupervised', 15) + linePts('phdCoSupervisedEnglish', 10),
+      magisterSupervised: linePts('magisterSupervised', 10),
+      sciEventOrg: linePts('sciEventOrg', 5, 10),
+      sciExpertise: linePts('sciExpertise', 5, 10),
+      intlProjects: linePts('intlProjects', 5, 10),
+      researchActivities: linePts('researchActivities', 5, 10) + linePts('priorityResearchProjects', 15),
+      fiveStarStudents: linePts('fiveStarStudents', 5),
+      officeFiliale: linePts('officeFiliale', 5, 10),
+      startupInnovation: linePts('startupInnovation', 20),
+      community: linePts('community', 5, 10),
+      society: linePts('society', 5, 10)
+    };
+    const sum = obj => Object.values(obj).reduce((a,b)=>a+b, 0);
+    return {pedagogy, researchOther, pedagogyTotal:sum(pedagogy), otherResearchTotal:sum(researchOther), teachingRaw, teachingCapped, coursePtsRaw, tdPtsRaw, tpPtsRaw, coursePts, tdPts, tpPts};
+  }
+
+  function updateSummary(results){
+    results = Array.isArray(results) ? results : (state.lastArticleResults || []);
+    state.lastArticleResults = results;
+    const articleTotal=results.reduce((a,b)=>a+(Number(b.points)||0),0);
+    const scores = criteriaScores();
+    const researchTotal = articleTotal + scores.otherResearchTotal;
+    const grandTotal = scores.pedagogyTotal + researchTotal;
+    const target=$('domain').value==='ST'?230:120;
+    const pedagogyTarget=80;
+    const yearsOk = num('yearsMCA') >= 5;
+    const pubOk = chk('minPublication');
+    const supervisionOk = chk('minSupervision');
+    const pedagogyOk = scores.pedagogyTotal >= pedagogyTarget;
+    const researchOk = researchTotal >= target;
+    const eligible = yearsOk && pubOk && supervisionOk && pedagogyOk && researchOk;
+
+    $('articleTotal').textContent=articleTotal.toFixed(2);
+    $('pedagogyTotal').textContent=scores.pedagogyTotal.toFixed(2);
+    $('otherResearchTotal').textContent=scores.otherResearchTotal.toFixed(2);
+    $('researchTotal').textContent=researchTotal.toFixed(2);
+    $('grandTotal').textContent=grandTotal.toFixed(2);
+    $('countAP').textContent=results.filter(r=>r.cls==='AP').length;
+    $('countA').textContent=results.filter(r=>r.cls==='A').length;
+    $('countB').textContent=results.filter(r=>r.cls==='B').length;
+    $('countPred').textContent=results.filter(r=>r.cls==='PRED').length;
+    $('countNF').textContent=results.filter(r=>r.cls==='NF').length;
+
+    $('pedagogyBar').style.width=Math.min(100, Math.round(scores.pedagogyTotal/pedagogyTarget*100))+'%';
+    $('researchBar').style.width=Math.min(100, Math.round(researchTotal/target*100))+'%';
+    const teachingNotes = [];
+    if(scores.coursePtsRaw > 60) teachingNotes.push(`Cours plafonné : ${scores.coursePtsRaw.toFixed(2)} ramené à 60 pts`);
+    if(scores.tdPtsRaw > 15) teachingNotes.push(`TD plafonné : ${scores.tdPtsRaw.toFixed(2)} ramené à 15 pts`);
+    if(scores.tpPtsRaw > 15) teachingNotes.push(`TP plafonné : ${scores.tpPtsRaw.toFixed(2)} ramené à 15 pts`);
+    if(scores.teachingRaw > 60) teachingNotes.push(`Enseignement Cours/TD/TP plafonné : ${scores.teachingRaw.toFixed(2)} ramené à 60 pts`);
+    const teachingNote = teachingNotes.length ? ` ${teachingNotes.join('. ')}.` : '';
+    $('thresholdText').textContent=`Pédagogie : ${scores.pedagogyTotal.toFixed(2)} / 80 pts. Recherche : ${researchTotal.toFixed(2)} / ${target} pts.${teachingNote}`;
+    $('adminStatus').innerHTML = yearsOk ? '<span class="oktext">OK</span>' : '<span class="badtext">Moins de 5 ans</span>';
+    const box=$('eligibilityBox');
+    if(eligible){
+      box.className='status ok';
+      box.innerHTML='<b>Dossier potentiellement recevable.</b><br>Les seuils saisis sont atteints : ancienneté, pédagogie, recherche, publication minimale et encadrement minimal.';
+    }else{
+      const missing=[];
+      if(!yearsOk) missing.push('ancienneté MCA A');
+      if(!pubOk) missing.push('publication minimale');
+      if(!supervisionOk) missing.push('encadrement minimal');
+      if(!pedagogyOk) missing.push('80 pts pédagogie');
+      if(!researchOk) missing.push(`${target} pts recherche`);
+      box.className='status warn';
+      box.innerHTML='<b>Dossier à compléter.</b><br>Manque : '+missing.join(', ')+'.';
+    }
+  }
+
+  $('clearCacheBtn').addEventListener('click', ()=>{ state.indexByYear={}; $('progress').textContent='Index réinitialisé. Recalculez pour relire les PDF.'; });
+  $('addArticleBtn').addEventListener('click', ()=>addArticle());
+  $('calcBtn').addEventListener('click', async ()=>{
+    const btn = $('calcBtn');
+    const oldText = btn.textContent;
+    try{
+      btn.disabled = true;
+      btn.textContent = 'Calcul en cours...';
+      $('progress').textContent = 'Calcul lancé. Recherche des PDF et lecture des ISSN...';
+      await calculateArticles();
+    }catch(e){
+      setZipStatus('Erreur calcul : '+e.message,'bad');
+      log('Erreur : '+e.message);
+      alert('Erreur pendant le calcul : ' + e.message);
+    }finally{
+      btn.disabled = false;
+      btn.textContent = oldText;
+    }
+  });
+  document.querySelectorAll('.criteria-input').forEach(el=>{
+    el.addEventListener('input', ()=>updateSummary(state.lastArticleResults || []));
+    el.addEventListener('change', ()=>updateSummary(state.lastArticleResults || []));
+  });
+
+  addArticle({year:'2018',issn:'',rank:'1'});
+  updateSummary([]);
+  loadJournalFolderManifest();
+</script>
+</body>
+</html>
