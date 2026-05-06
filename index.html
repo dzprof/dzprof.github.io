@@ -101,6 +101,7 @@
     .status{padding:13px;border-radius:16px;background:#f8fafc;border:1px solid var(--line);font-size:14px;color:#334155}.status.ok{background:#ecfdf5;border-color:#86efac;color:#166534}.status.warn{background:#fffbeb;border-color:#fcd34d;color:#92400e}.status.bad{background:#fef2f2;border-color:#fca5a5;color:#991b1b}
     .score{font-size:44px;font-weight:1000;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.04em}.muted{color:var(--muted)}.sumline{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px dashed #d7e3f1;font-size:14px}.sumline strong{font-size:15px}.bar{height:13px;background:#dbeafe;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(15,23,42,.08)}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent),var(--accent2));width:0;border-radius:999px}.note{font-size:13px;color:#475569;line-height:1.55}.hidden{display:none}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
     .footer{margin:30px auto 0;text-align:center;color:#0f172a;font-size:clamp(18px,2.3vw,28px);font-weight:700;line-height:1.9;background:linear-gradient(135deg,#ffffff,#eff6ff 55%,#fff7ed);border:1px solid rgba(215,227,241,.9);border-radius:28px;padding:24px;box-shadow:var(--shadow);direction:rtl}
+    .signature{margin:10px 0 0;text-align:right;font-weight:700;font-size:21px;letter-spacing:-.02em;color:#ffffff}
     .section{margin-top:24px;padding-top:20px;border-top:1px solid #d9e6f5}.section:first-child{border-top:0}.section-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-end;margin-bottom:4px}.detail{font-size:12px;color:#64748b}.mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
     .subcard{border:1px solid rgba(203,216,234,.95);border-radius:22px;background:linear-gradient(180deg,#ffffff,#f8fbff);padding:16px;margin-top:15px;box-shadow:0 8px 20px rgba(15,23,42,.04)}.subcard h3{margin:0 0 13px;color:#0f172a;display:flex;align-items:center;gap:8px;font-weight:500}.subcard h3:before{content:"";width:9px;height:22px;border-radius:999px;background:linear-gradient(180deg,var(--accent3),var(--accent2))}
     .check{display:flex;align-items:flex-start;gap:9px;border:1px solid #d7e3f1;border-radius:14px;padding:11px;background:#fff;box-shadow:0 3px 10px rgba(15,23,42,.035)}.check input{margin-top:3px;accent-color:var(--accent)}.check span{font-size:13px;font-weight:700;color:#334155}.check small{display:block;font-weight:400;color:var(--muted);margin-top:4px}.oktext{color:#15803d;font-weight:1000}.badtext{color:#b91c1c;font-weight:1000}.drop{border:2px dashed #93c5fd;background:linear-gradient(135deg,#eff6ff,#fff);border-radius:18px;padding:16px;text-align:center}.drop input{margin-top:10px}.progress{font-size:13px;color:#475569;white-space:pre-wrap;max-height:120px;overflow:auto;background:#f8fafc;border-radius:14px;padding:11px;border:1px solid var(--line)}
@@ -120,8 +121,7 @@
   <div class="wrap">
     <section class="hero">
       <h1>Calculateur de promotion au grade de Professeur</h1>
-      <p>Ce calculateur additionne les critères de recevabilité, de pédagogie et de recherche. Pour les articles A+/A/B, il vérifie automatiquement l’ISSN, détecte la catégorie ou les revues prédatrices, puis applique le coefficient selon le rang d’auteur.</p>
-    </section>
+      <p>Ce calculateur additionne les critères de recevabilité, de pédagogie et de recherche. Pour les articles A+/A/B, il vérifie automatiquement l’ISSN, détecte la catégorie ou les revues prédatrices, puis applique le coefficient selon le rang d’auteur.</p></section>
 
     <div class="grid">
       <main class="card">
@@ -333,7 +333,7 @@
   // Elle lit automatiquement les dossiers JOURNAUX/annee/, JOURNAUX/annee/A+/, JOURNAUX/annee/A/ et JOURNAUX/annee/B/
   // depuis le serveur local, par exemple avec : python -m http.server
   const ISSN_RE = /(?<!\d)(\d{4})\s*[-–— ]?\s*(\d{3}[0-9Xx])(?!\d)/g;
-  const state = { files:[], indexByYear:{}, rows:[], lastArticleResults:[] };
+  const state = { files:[], indexByYear:{}, rows:[], lastArticleResults:[], journalRecords:[], indexLoaded:false };
 
   const $ = (id)=>document.getElementById(id);
   const log = (msg)=>{ const p=$('progress'); p.textContent = (p.textContent==='Aucun PDF lu pour le moment.'?'':p.textContent+'\n') + msg; p.scrollTop=p.scrollHeight; };
@@ -460,6 +460,71 @@ Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
   }
 
 
+  async function tryLoadJournalIndex(){
+    try{
+      const response = await fetch('journaux_index.json?ts=' + Date.now(), {cache:'no-store'});
+      if(!response.ok) return false;
+      const data = await response.json();
+      const list = Array.isArray(data) ? data : (data.records || []);
+      const records = list
+        .filter(x => x && (x.annee || x.year) && (x.categorie || x.cat))
+        .map(x => ({
+          year: String(x.annee || x.year),
+          cat: normalizeCategory(x.categorie || x.cat),
+          journal: cleanJournalName(x.titre || x.journal || x.title || ''),
+          publisher: cleanJournalName(x.editeur || x.publisher || ''),
+          issn: normalizeISSN(x.issn || ''),
+          source: cleanJournalName(x.source || ''),
+          file: normalizePath(x.path || x.fichier || x.file || x.source || ''),
+          page: Number(x.page || 0),
+          context: String(x.texte || x.context || x.titre || x.journal || x.title || x.editeur || x.publisher || '').replace(/\s+/g,' ').trim()
+        }))
+        .filter(x => x.year && ['AP','A','B','PRED'].includes(x.cat) && (x.issn || x.journal || x.publisher || x.context));
+      if(!records.length) return false;
+      state.journalRecords = records;
+      state.indexLoaded = true;
+      const years = [...new Set(records.map(r => r.year))].sort();
+      log(`journaux_index.json chargé : ${records.length} entrées (${years.join(', ')}). Calcul rapide activé.`);
+      return true;
+    }catch(e){
+      log('journaux_index.json non chargé : ' + e.message);
+      return false;
+    }
+  }
+
+  function normalizeCategory(cat){
+    const c = String(cat || '').trim().toUpperCase().replace(/\s+/g,'');
+    if(c === 'A+' || c === 'AP' || c === 'APLUS') return 'AP';
+    if(c === 'A') return 'A';
+    if(c === 'B') return 'B';
+    if(c.includes('PRED')) return 'PRED';
+    return c;
+  }
+
+  function buildIndexFromJournalRecords(year){
+    const idx = {AP:new Map(), A:new Map(), B:new Map(), PRED:new Map(), TEXT:[]};
+    const records = (state.journalRecords || []).filter(r => String(r.year) === String(year));
+    for(const r of records){
+      const item = {
+        file: r.file || r.source || '',
+        source: r.source || referenceNameFromPath(r.file || ''),
+        page: r.page || 0,
+        context: r.context || [r.journal, r.publisher, r.issn].filter(Boolean).join(' '),
+        journal: r.journal || r.publisher || '',
+        displayJournal: r.journal || r.publisher || '',
+        issn: r.issn || '',
+        cat: r.cat
+      };
+      idx.TEXT.push({cat:r.cat, file:item.file, source:item.source, page:item.page, text:[item.context, item.journal, item.source, item.issn].filter(Boolean).join(' ')});
+      if(r.issn){
+        if(!idx[r.cat].has(r.issn)) idx[r.cat].set(r.issn, []);
+        idx[r.cat].get(r.issn).push(item);
+      }
+    }
+    log(`Index rapide ${year} : ${records.length} entrées JSON (A+=${idx.AP.size}, A=${idx.A.size}, B=${idx.B.size}, prédatrice=${idx.PRED.size}).`);
+    return idx;
+  }
+
   async function tryLoadManifest(){
     try{
       const response = await fetch('journaux_manifest.json?ts=' + Date.now(), {cache:'no-store'});
@@ -527,20 +592,32 @@ Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
     state.files = [];
     state.discoveredYears = {};
     state.manifestLoaded = false;
+    state.indexLoaded = false;
     if(showFileModeWarning()) return;
+    const hasFastIndex = await tryLoadJournalIndex();
+    if(hasFastIndex){
+      setZipStatus('<b>journaux_index.json</b> chargé. Calcul rapide activé.', 'ok');
+      $('progress').textContent = 'Index rapide chargé. Cliquez sur Calculer les articles : la page ne relira plus les PDF.';
+      return;
+    }
     const hasManifest = await tryLoadManifest();
     if(hasManifest){
-      setZipStatus('<b>journaux_manifest.json</b> chargé. La version site web est prête.', 'ok');
-      $('progress').textContent = 'Manifest chargé. Cliquez sur Calculer les articles pour lire les PDF de l’année demandée.';
+      setZipStatus('<b>journaux_manifest.json</b> chargé. Mode PDF actif.', 'ok');
+      $('progress').textContent = 'Manifest chargé. Cliquez sur Calculer les articles pour lire les PDF de l’année demandée. Pour accélérer, générez journaux_index.json.';
       return;
     }
     const mode = isGitHubPages() ? 'GitHub Pages détecté : lecture des PDF via API GitHub.' : 'Lecture directe du dossier JOURNAUX.';
     setZipStatus(`<b>Dossier JOURNAUX</b> prêt. ${mode}`, 'ok');
-    $('progress').textContent = mode + ' Cliquez sur Calculer les articles pour lire les PDF de l’année demandée. Si cela ne marche pas sur GitHub Pages, ajoutez journaux_manifest.json à côté de index.html.';
+    $('progress').textContent = mode + ' Cliquez sur Calculer les articles pour lire les PDF de l’année demandée. Pour accélérer, générez journaux_index.json.';
   }
 
   async function indexYear(year){
     if(state.indexByYear[year]) return state.indexByYear[year];
+    if(state.indexLoaded){
+      const idxFast = buildIndexFromJournalRecords(year);
+      state.indexByYear[year] = idxFast;
+      return idxFast;
+    }
     await discoverYear(year);
 
     const idx = {AP:new Map(), A:new Map(), B:new Map(), PRED:new Map(), TEXT:[]};
@@ -584,7 +661,8 @@ Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
                   file:f.path,
                   page:pageNo,
                   context:text.replace(/\s+/g,' ').trim(),
-                  journal: journalName
+                  journal: journalName,
+                  cat: f.cat
                 });
               }
             }
@@ -861,7 +939,10 @@ Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
 
   function sourceLabel(journal, issn, file){
     const title = cleanJournalName(journal) || '-';
-    const ref = referenceNameFromPath(file);
+    // Afficher uniquement le nom lisible du fichier de référence, jamais le chemin complet
+    // Exemple : JOURNAUX/2023/Liste des revues scientifiques prédatrices 2023.pdf
+    // devient : Liste des revues scientifiques prédatrices 2023
+    const ref = referenceNameFromPath(file) || cleanJournalName(file);
     const normalizedIssn = normalizeISSN(issn || '');
     if(title === '-') return normalizedIssn ? `${normalizedIssn}${ref ? `   (${ref})` : ''}` : '-';
     if(normalizedIssn && ref) return `${title}   (${normalizedIssn})   (${ref})`;
@@ -963,6 +1044,74 @@ Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
     return null;
   }
 
+
+  function findPredatoryInAllYears(query){
+    if(!state.indexLoaded || !String(query || '').trim()) return null;
+    const matches = [];
+    for(const r of (state.journalRecords || [])){
+      if(r.cat !== 'PRED') continue;
+      const hay = [r.journal, r.publisher, r.context, r.source, r.file, r.issn].filter(Boolean).join(' ');
+      if(titleMatchInText(hay, query)){
+        matches.push({
+          cat: 'PRED',
+          file: r.file || r.source || '',
+          source: r.source || referenceNameFromPath(r.file || ''),
+          page: r.page || 0,
+          context: r.context || [r.journal, r.publisher, r.issn].filter(Boolean).join(' '),
+          journal: r.journal || r.publisher || cleanJournalName(query),
+          displayJournal: r.journal || r.publisher || cleanJournalName(query),
+          publisher: r.publisher || '',
+          issn: r.issn || '',
+          year: r.year || ''
+        });
+      }
+    }
+    if(!matches.length) return null;
+
+    // Trier les correspondances : exactes d'abord, puis par année croissante pour voir l'historique.
+    matches.sort((a,b)=>{
+      const q = normalizeSearchQuery(query);
+      const aText = normalizeSearchQuery((a.journal || '') + ' ' + (a.publisher || ''));
+      const bText = normalizeSearchQuery((b.journal || '') + ' ' + (b.publisher || ''));
+      const aExact = aText === q ? 1 : 0;
+      const bExact = bText === q ? 1 : 0;
+      if(bExact !== aExact) return bExact - aExact;
+      return String(a.year || '').localeCompare(String(b.year || ''));
+    });
+
+    // Eviter les doublons stricts, mais garder les années différentes.
+    const seen = new Set();
+    const unique = [];
+    for(const m of matches){
+      const key = [normalizeSearchQuery(m.journal), referenceNameFromPath(m.source || m.file), m.year].join('|');
+      if(seen.has(key)) continue;
+      seen.add(key);
+      unique.push(m);
+    }
+    return unique;
+  }
+
+  function globalPredatorySource(list, query){
+    if(!list || !list.length) return '-';
+    const seen = new Set();
+    const cleanQuery = cleanJournalName(query);
+    const lines = [];
+    for(const item of list){
+      const ref = referenceNameFromPath(item.source || item.file) || cleanJournalName(item.source || item.file);
+      if(!ref) continue;
+      const key = normalizeSearchQuery(ref);
+      if(seen.has(key)) continue;
+      seen.add(key);
+      // Pour les listes prédatrices globales, afficher uniquement :
+      // Titre revue/éditeur (nom du fichier référence)
+      // sans ISSN, sans chemin JOURNAUX et sans mention "année".
+      const journal = cleanQuery || cleanJournalName(item.displayJournal) || cleanJournalName(item.journal) || '-';
+      const label = `${journal} (${ref})`;
+      lines.push(`<div>${escapeHtml(label)}</div>`);
+    }
+    return `<strong>${lines.join('')}</strong>`;
+  }
+
   function fillIssnIfEmpty(rowIndex, matchList){
     if(!matchList || !matchList.length) return;
     const foundIssn = normalizeISSN(matchList[0].issn || '');
@@ -978,8 +1127,12 @@ Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
     if(!list || !list.length) return '-';
     const x = list[0];
     const journal = cleanJournalName(x.displayJournal) || cleanJournalName(x.journal) || journalNameFromContext(x.context, issnOrQuery) || '-';
-    const foundIssn = normalizeISSN(x.issn || issnOrQuery || '');
-    const label = sourceLabel(journal, foundIssn, x.file);
+    // Pour les listes prédatrices, ne pas afficher l'ISSN dans Source trouvée.
+    // Format voulu : Titre de la revue   (nom du fichier référence)
+    const sourceText = String((x.source || '') + ' ' + (x.file || ''));
+    const isPredatorySource = x.cat === 'PRED' || categoryFromPath(x.file || x.source || '') === 'PRED' || /predat|prédat|predatrice|prédateur|revues scientifiques prédatrices/i.test(sourceText);
+    const foundIssn = isPredatorySource ? '' : normalizeISSN(x.issn || issnOrQuery || '');
+    const label = sourceLabel(journal, foundIssn, x.source || x.file);
     return `<strong>${escapeHtml(label)}</strong>`;
   }
 
@@ -998,7 +1151,9 @@ Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
       if(idx){
         const predByTitle = titleQuery ? findByTitleOrPublisher(idx, titleQuery, ['PRED']) : null;
         if(predByTitle){
-          status='Revue prédatrice'; cls='PRED'; points=0; src=formatSource(predByTitle, issn || titleQuery);
+          status='Revue prédatrice'; cls='PRED'; points=0;
+          const allPredMatches = titleQuery ? findPredatoryInAllYears(titleQuery) : null;
+          src = allPredMatches ? globalPredatorySource(allPredMatches, titleQuery) : formatSource(predByTitle, issn || titleQuery);
         }else if(issn){
           if(idx.PRED.has(issn)){
             status='Revue prédatrice'; cls='PRED'; points=0; src=formatSource(idx.PRED.get(issn), issn);
@@ -1015,7 +1170,11 @@ Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
             if(apByTitle){ fillIssnIfEmpty(i, apByTitle); status='Catégorie A+'; cls='AP'; points=160*authorFactor(r.rank); src=formatSource(apByTitle, titleQuery); }
             else if(aByTitle){ fillIssnIfEmpty(i, aByTitle); status='Catégorie A'; cls='A'; points=80*authorFactor(r.rank); src=formatSource(aByTitle, titleQuery); }
             else if(bByTitle){ fillIssnIfEmpty(i, bByTitle); status='Catégorie B'; cls='B'; points=40*authorFactor(r.rank); src=formatSource(bByTitle, titleQuery); }
-            else { status='ISSN / titre non trouvé'; cls='NF'; points=0; }
+            else {
+              const predAllYears = findPredatoryInAllYears(titleQuery);
+              if(predAllYears){ status='Revue prédatrice'; cls='PRED'; points=0; src=globalPredatorySource(predAllYears, titleQuery); }
+              else { status='ISSN / titre non trouvé'; cls='NF'; points=0; }
+            }
           }else{
             status='ISSN non trouvé'; cls='NF'; points=0;
           }
@@ -1026,7 +1185,11 @@ Ensuite ouvrez : http://localhost:8000/promotion_professeur_calculateur.html`;
           if(apByTitle){ fillIssnIfEmpty(i, apByTitle); status='Catégorie A+'; cls='AP'; points=160*authorFactor(r.rank); src=formatSource(apByTitle, titleQuery); }
           else if(aByTitle){ fillIssnIfEmpty(i, aByTitle); status='Catégorie A'; cls='A'; points=80*authorFactor(r.rank); src=formatSource(aByTitle, titleQuery); }
           else if(bByTitle){ fillIssnIfEmpty(i, bByTitle); status='Catégorie B'; cls='B'; points=40*authorFactor(r.rank); src=formatSource(bByTitle, titleQuery); }
-          else { status='Titre / éditeur non trouvé'; cls='NF'; points=0; }
+          else {
+            const predAllYears = findPredatoryInAllYears(titleQuery);
+            if(predAllYears){ status='Revue prédatrice'; cls='PRED'; points=0; src=globalPredatorySource(predAllYears, titleQuery); }
+            else { status='Titre / éditeur non trouvé'; cls='NF'; points=0; }
+          }
         }
       }
       results.push({status, cls, points});
