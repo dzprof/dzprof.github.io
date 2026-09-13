@@ -1,0 +1,10 @@
+# Fichiers volumineux rejetés par GitHub (> 100 Mo)
+journaux_index.json
+journaux_index.zip
+
+# Dossier des PDF originaux (inutile en ligne, journaux_index/ suffit)
+JOURNAUX/
+
+# Cache Python
+__pycache__/
+*.pyc
